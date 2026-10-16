@@ -98,22 +98,6 @@ src/
 
 ---
 
-## 4. Modern Frontend Developer Naming Conventions (No Academic Java Jargon)
-
-We replaced theoretical backend DDD terms (`domain/entities`, `infrastructure`, `application`, `presentation`) with **intuitive, standard React/TypeScript conventions**:
-
-| Old Academic Term | Modern Frontend Standard | Responsibility |
-| :--- | :--- | :--- |
-| `domain/entities/` | **`types/`** | Pure TypeScript interfaces & data contracts (`assessment.types.ts`). |
-| `domain/schemas/` | **`schemas/`** | Zod validation schemas at API boundaries (`assessment.schema.ts`). |
-| `infrastructure/api/` | **`api/`** | Universal Axios/Fetch functions (`assessment.api.ts`). |
-| `application/hooks/` | **`hooks/`** | TanStack Query hooks, query keys, SSR prefetch helpers (`useAssessment.ts`). |
-| `presentation/components/` | **`components/`** | Reusable UI widgets (`VirtualizedAssessmentTable.tsx`). |
-| `presentation/pages/` | **`views/`** | Full-screen interactive workbenches (`ApartmentAssessmentView.tsx`). |
-| `domain/services/` | **`utils/`** | Calculation math, difference engines, formatters (`taxCalculation.utils.ts`). |
-
----
-
 ## 5. Architectural Evolution: Retiring the Legacy 6-Layer Chain
 
 ### Why the Old 6-Layer Chain (`UI -> Hook -> Action -> Service -> API`) Was Retired
