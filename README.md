@@ -1,5 +1,5 @@
 # NTIS 2.0: Architecture & Developer Onboarding Guide
-** Core Architecture Documentation**  
+**Core Architecture Documentation**  
 **Audience:** All Software Engineers, Technical Leads, and Solution Architects  
 
 ---
@@ -52,13 +52,17 @@ We **strictly prohibit** dumping services, types, or hooks into giant global fol
 
 ```text
 src/
+├── middleware.ts                        # Edge module licensing guard (Directly under src/)
+│
 ├── app/                                 # THIN NEXT.JS APP ROUTER SHELL
 │   ├── property-tax/                    # Route entry points only
 │   │   └── apartment/page.tsx           # Server Component (Prefetches & Dehydrates)
 │   ├── water-bill/
 │   ├── grievance/
 │   ├── layout.tsx                       # Root layout & providers
-│   └── middleware.ts                    # Edge module licensing guard
+│   ├── loading.tsx                      # Global streaming shimmer skeleton
+│   ├── error.tsx                        # Global route error boundary (Try Again)
+│   └── not-found.tsx                    # Clean 404 handler
 │
 ├── modules/                             # ISOLATED BUSINESS DOMAIN SLICES
 │   ├── property-tax/                    # DOMAIN: PTIS
@@ -79,7 +83,7 @@ src/
 │   │   └── config.ts                    # Locales, dictionary loaders, translation keys
 │   ├── http/                            # Universal apiClient.ts & api-types.ts
 │   ├── providers/                       # QueryProvider.tsx
-│   ├── ui/                              # Design System (Button, Badge, Modal, Input)
+│   ├── ui/                              # Design System (Button, Badge, Modal, Input, ErrorBoundary)
 │   └── utils/                           # cn.ts, formatters, currency helpers
 │
 └── __tests__/                           # AUTOMATED TEST SUITE (Vitest + Testing Library)
