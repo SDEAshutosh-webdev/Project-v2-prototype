@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
-import { assessmentApi, AssessmentQueryParams } from '../../infrastructure/api/assessmentApi';
-import { AssessmentUnitFormValues } from '../../domain/schemas/AssessmentUnitSchema';
+import { assessmentApi, AssessmentQueryParams } from '../api/assessment.api';
+import { AssessmentUnitFormValues } from '../schemas/assessment.schema';
 
 export const ptisKeys = {
   all: ['ptis'] as const,

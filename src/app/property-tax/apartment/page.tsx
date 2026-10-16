@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
-import { prefetchAssessmentUnits } from '@/modules/property-tax/application/hooks/useAssessmentUnits';
-import { ApartmentAssessmentPage } from '@/modules/property-tax/presentation/pages/ApartmentAssessmentPage';
+import { prefetchAssessmentUnits } from '@/modules/property-tax/hooks/useAssessment';
+import { ApartmentAssessmentView } from '@/modules/property-tax/views/ApartmentAssessmentView';
 
 export const metadata = {
   title: 'Apartment Assessment | NTIS Enterprise',
@@ -21,7 +21,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ApartmentAssessmentPage initialParams={{ propertyId: propertyId }} />
+      <ApartmentAssessmentView initialParams={{ propertyId: propertyId }} />
     </HydrationBoundary>
   );
 }

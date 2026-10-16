@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { assessmentUnitSchema, assessmentUnitCreateSchema } from '@/modules/property-tax/domain/schemas/AssessmentUnitSchema';
+import { assessmentUnitSchema, assessmentUnitCreateSchema } from '@/modules/property-tax/schemas/assessment.schema';
 
-describe('AssessmentUnitSchema (Zod Validation at Boundaries)', () => {
+describe('AssessmentUnitSchema (Frontend Boundary Validation)', () => {
   it('should validate and parse valid assessment unit payload', () => {
     const raw = {
       id: 'unit-101',

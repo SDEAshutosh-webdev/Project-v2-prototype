@@ -1,12 +1,11 @@
 import { apiClient } from '@/shared/http/api-client';
-import { AssessmentUnit } from '../../domain/entities/AssessmentUnit';
-import { AssessmentUnitFormValues, pagedAssessmentUnitsResponseSchema } from '../../domain/schemas/AssessmentUnitSchema';
+import { AssessmentUnit } from '../types/assessment.types';
+import { AssessmentUnitFormValues, pagedAssessmentUnitsResponseSchema } from '../schemas/assessment.schema';
 import { PagedResult, BaseQueryParams } from '@/shared/http/api-types';
 
 export interface AssessmentQueryParams extends BaseQueryParams {
   propertyId?: string;
   wardId?: string;
-  status?: string;
 }
 
 const generateMockUnits = (propertyId: string): AssessmentUnit[] => {
@@ -32,12 +31,10 @@ export const assessmentApi = {
   getAll: async (params?: AssessmentQueryParams): Promise<PagedResult<AssessmentUnit>> => {
     try {
       const { data } = await apiClient.get<unknown>('/api/ptis/units', { params });
-      
       const parsed = pagedAssessmentUnitsResponseSchema.safeParse(data);
       if (parsed.success) {
         return parsed.data;
       }
-      console.warn('[API Boundary] Zod validation failed for assessment units, falling back to mock:', parsed.error);
       throw new Error('API Schema Validation Mismatch');
     } catch {
       const propId = params && params.propertyId ? params.propertyId : 'PROP-MAH-401';

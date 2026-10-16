@@ -2,7 +2,7 @@
 
 import React, { useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { AssessmentUnit } from '../../domain/entities/AssessmentUnit';
+import { AssessmentUnit } from '../types/assessment.types';
 import { Badge } from '@/shared/ui/Badge';
 import { AlertCircle, Building2 } from 'lucide-react';
 

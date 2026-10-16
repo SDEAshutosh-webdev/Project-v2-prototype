@@ -1,5 +1,6 @@
 # NTIS 2.0: Architecture & Developer Onboarding Guide
-**Core Architecture Documentation**  
+## The Modern Municipal ERP Engineering Standard
+**Sthapatya Consultants (I) Pvt. Ltd. • Core Architecture Documentation**
 **Audience:** All Software Engineers, Technical Leads, and Solution Architects  
 
 ---
@@ -66,10 +67,13 @@ src/
 │
 ├── modules/                             # ISOLATED BUSINESS DOMAIN SLICES
 │   ├── property-tax/                    # DOMAIN: PTIS
-│   │   ├── domain/                      # Layer 1: Entities & Zod Schemas
-│   │   ├── infrastructure/              # Layer 2: API endpoints & DTO mappers
-│   │   ├── application/                 # Layer 3: TanStack Query hooks & prefetchers
-│   │   └── presentation/                # Layer 4: Virtualized tables, forms, pages
+│   │   ├── types/                       # TypeScript interfaces: assessment.types.ts
+│   │   ├── schemas/                     # Zod validation schemas: assessment.schema.ts
+│   │   ├── api/                         # API transport functions: assessment.api.ts
+│   │   ├── hooks/                       # TanStack Query & custom hooks: useAssessment.ts
+│   │   ├── components/                  # Reusable UI widgets: VirtualizedAssessmentTable.tsx
+│   │   ├── views/                       # Full client workbenches: ApartmentAssessmentView.tsx
+│   │   └── utils/                       # Tax math & difference engine algorithms
 │   │
 │   ├── water-bill/                      # DOMAIN: WTIS (Completely isolated)
 │   ├── assets/                          # DOMAIN: Municipal Assets & GIS
@@ -82,6 +86,7 @@ src/
 │   ├── i18n/                            # Internationalization (English, Marathi, Hindi)
 │   │   └── config.ts                    # Locales, dictionary loaders, translation keys
 │   ├── http/                            # Universal apiClient.ts & api-types.ts
+│   ├── services/                        # Service re-export aliases
 │   ├── providers/                       # QueryProvider.tsx
 │   ├── ui/                              # Design System (Button, Badge, Modal, Input, ErrorBoundary)
 │   └── utils/                           # cn.ts, formatters, currency helpers
@@ -94,7 +99,94 @@ src/
 
 ---
 
-## 4. Why `config` and `i18n` Belong in the `shared/` Layer
+## 4. Modern Frontend Developer Naming Conventions (No Academic Java Jargon)
+
+We replaced theoretical backend DDD terms (`domain/entities`, `infrastructure`, `application`, `presentation`) with **intuitive, standard React/TypeScript conventions**:
+
+| Old Academic Term | Modern Frontend Standard | Responsibility |
+| :--- | :--- | :--- |
+| `domain/entities/` | **`types/`** | Pure TypeScript interfaces & data contracts (`assessment.types.ts`). |
+| `domain/schemas/` | **`schemas/`** | Zod validation schemas at API boundaries (`assessment.schema.ts`). |
+| `infrastructure/api/` | **`api/`** | Universal Axios/Fetch functions (`assessment.api.ts`). |
+| `application/hooks/` | **`hooks/`** | TanStack Query hooks, query keys, SSR prefetch helpers (`useAssessment.ts`). |
+| `presentation/components/` | **`components/`** | Reusable UI widgets (`VirtualizedAssessmentTable.tsx`). |
+| `presentation/pages/` | **`views/`** | Full-screen interactive workbenches (`ApartmentAssessmentView.tsx`). |
+| `domain/services/` | **`utils/`** | Calculation math, difference engines, formatters (`taxCalculation.utils.ts`). |
+
+---
+
+## 5. Architectural Evolution: Retiring the Legacy 6-Layer Chain
+
+### Why the Old 6-Layer Chain (`UI -> Hook -> Action -> Service -> API`) Was Retired
+In legacy guidance, operations were chained through 5 to 6 hops:
+```
+OLD LEGACY CHAIN (5 to 6 Hops for Every Operation):
+UI Component 
+   └──> Custom Hook 
+         └──> Server Action ('use server') 
+               └──> Service Layer 
+                     └──> API Service 
+                           └──> Backend REST API
+```
+
+#### Why That Old Chain Caused Severe Problems:
+1. **The "Server Action" Read Anti-Pattern:**
+   * Next.js Server Actions (`'use server'`) were designed for **mutations (POST requests)**.
+   * When developers used Server Actions to fetch table data (reads), Next.js sent them as **HTTP POST requests** under the hood.
+   * **Result:** No HTTP browser caching, no CDN edge caching, and duplicate network requests on every tab switch.
+2. **File Fatigue (The 5-File Tax):**
+   * To add one single field (e.g. `carpetArea`), a developer had to modify: (1) Component, (2) Hook, (3) Server Action, (4) Service, (5) DTO file.
+   * Developers spent 80% of their day wiring glue code across 5 files instead of writing municipal business logic.
+
+---
+
+### What We Follow in the New Architecture (Streamlined 3-Tier Pattern)
+
+We replaced the 6-layer chain with separate, optimized paths for **Reads** and **Writes**:
+
+```
+NEW MODERN PATTERN:
+
+READ PATH (Data Tables, Ledgers, Dropdowns):
+Page / View ───> Hook (useQuery) ───> API (api.ts) ───> Backend REST API
+  │                                    │
+  └─ SSR Prefetch (Zero Spinner)       └─ Zod Validation (Runtime Guard)
+
+WRITE PATH (Form Submissions, Edits, Deletes):
+Form Modal ───> Hook (useMutation) ───> API (api.ts) ───> Backend REST API
+  │                                     │
+  └─ React Hook Form + Zod Schema       └─ Auto-invalidates Query Cache on Success!
+```
+
+---
+
+### Side-by-Side Comparison: Old vs. New
+
+| Operation | Old Legacy NTIS Approach | New Prototype Architecture | Why the New Way Wins |
+| :--- | :--- | :--- | :--- |
+| **Fetching Data (Reads)** | `Component -> Hook -> Server Action -> Service -> api.service.ts` | **`View -> useQuery() -> api.ts`** | • Reads use true HTTP GET.<br>• Cached in memory via TanStack Query.<br>• Prefetched during SSR for instant FCP. |
+| **Submitting Forms (Writes)** | `Component -> useActionState -> Server Action -> Service -> API` | **`Form -> useMutation() -> api.ts`** | • Validated by Zod before sending.<br>• On success, automatically invalidates table queries so UI updates instantly without full page reloads. |
+| **DTO / Types** | Manual TypeScript interfaces with runtime `any` casts | **`types/` + `schemas/` (Zod)** | Types provide compile-time autocomplete; Zod guarantees runtime type safety and number coercion. |
+| **Routing & URL State** | `useState` or complex router refreshes | **URL SearchParams (`searchParams`)** | Browser back/forward works; links are bookmarkable and shareable. |
+
+---
+
+### Where Did `Action` and `Service` Go?
+
+* **Where did `Service` go?**  
+  `Service` and `API` were merged into **`api/`** (e.g. `assessment.api.ts`). In frontend code, an Axios/Fetch caller that parses DTOs is simply your API client. Having both a `foo.service.ts` and a `foo.api.ts` was an artificial Java-style separation that just passed data through.
+
+* **Where did `Action` go? Does it ever have a place?**  
+  Server Actions (`'use server'`) are **only** needed for **Server-Only operations**:
+  1. Managing `HttpOnly` security cookies on login/logout.
+  2. Calling internal private microservices behind a corporate firewall that the browser cannot reach.
+  3. Triggering heavy server background jobs (like an asynchronous 50,000-row Excel export generator).
+  
+  For standard data grids, ledgers, and CRUD operations, **using `useQuery` and `useMutation` is 10x faster, fully cached, and requires half the code.**
+
+---
+
+## 6. Why `config` and `i18n` Belong in the `shared/` Layer
 
 ### The Architectural Rule:
 1. **One-Way Dependency Rule**: `src/modules/*` can import from `src/shared/*`. But **`src/shared/*` must NEVER import from `src/modules/*`**.
@@ -103,7 +195,7 @@ src/
 
 ---
 
-## 5. Automated Test Suite (Vitest + JSDOM)
+## 7. Automated Test Suite (Vitest + JSDOM)
 
 The project includes an automated test runner configured in `vitest.config.ts`:
 
@@ -113,7 +205,7 @@ The project includes an automated test runner configured in `vitest.config.ts`:
 * `npm run test:coverage`: Generates test coverage reports (`v8` provider).
 
 ### What We Test:
-1. **Domain Boundary Testing (`AssessmentUnitSchema.test.ts`)**:
+1. **Domain Boundary Testing (`assessment.schema.test.ts`)**:
    * Ensures Zod rejects invalid inputs, coerces string numbers, and applies default values.
 2. **Shared Config & i18n Testing (`configAndI18n.test.ts`)**:
    * Verifies supported languages (English, Marathi, Hindi) and fallback dictionary resolution.
@@ -165,6 +257,9 @@ The project includes an automated test runner configured in `vitest.config.ts`:
 ---
 
 ## 8. Reference Project
+
+For a full working reference implementation of this architecture, explore:
+📂 **`C:\Users\ashutosh.chikhalkar\Desktop\ntis-v2-prototype`**
 * Test Suite: `npm run test:run` (Vitest: 6/6 tests passing).
 * Type Check: `npm run type-check` (TypeScript: 0 errors).
 * Production Build: `npm run build` (Next.js 15 App Router: 0 errors).
