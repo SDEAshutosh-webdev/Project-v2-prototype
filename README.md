@@ -161,9 +161,6 @@ The project includes an automated test runner configured in `vitest.config.ts`:
 ---
 
 ## 8. Reference Project
-
-For a full working reference implementation of this architecture, explore:
-📂 **`C:\Users\ashutosh.chikhalkar\Desktop\ntis-v2-prototype`**
 * Test Suite: `npm run test:run` (Vitest: 6/6 tests passing).
 * Type Check: `npm run type-check` (TypeScript: 0 errors).
 * Production Build: `npm run build` (Next.js 15 App Router: 0 errors).
