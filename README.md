@@ -1,6 +1,5 @@
 # NTIS 2.0: Architecture & Developer Onboarding Guide
-## The Modern Municipal ERP Engineering Standard
-**Sthapatya Consultants (I) Pvt. Ltd. • Core Architecture Documentation**  
+** Core Architecture Documentation**  
 **Audience:** All Software Engineers, Technical Leads, and Solution Architects  
 
 ---
